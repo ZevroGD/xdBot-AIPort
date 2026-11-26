@@ -147,7 +147,7 @@ bool Renderer::shouldUseAPI() {
     #ifdef GEODE_IS_WINDOWS
 
     bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
-    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<asp::fs::Path>("ffmpeg_path").toStdPath();
     bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
 
     return !foundExe && foundApi;
@@ -168,7 +168,7 @@ bool Renderer::toggle() {
     }
 
     bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
-    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<asp::fs::Path>("ffmpeg_path").toStdPath();
     bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
 
     g.renderer.usingApi = Renderer::shouldUseAPI();
@@ -207,7 +207,7 @@ bool Renderer::toggle() {
             return false;
         }
 
-        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
+        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("render_folder").toStdPath();
 
         if (std::filesystem::exists(path))
             g.renderer.start();
@@ -252,7 +252,7 @@ void Renderer::start() {
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     
     std::string filename = fmt::format("render_{}_{}{}", std::string_view(pl->m_level->m_levelName), std::to_string(timestamp), extension);
-    std::string path = (Mod::get()->getSettingValue<std::filesystem::path>("render_folder") / filename).string();
+    std::string path = (Mod::get()->getSettingValue<asp::fs::Path>("render_folder").toStdPath() / filename).string();
 
     width = std::stoi(mod->getSavedValue<std::string>("render_width2"));
     height = std::stoi(mod->getSavedValue<std::string>("render_height"));
@@ -436,7 +436,7 @@ void Renderer::start() {
         }
 
         std::filesystem::path tempPath = std::filesystem::path(path).parent_path() / ("temp_" + std::filesystem::path(path).filename().string());
-        std::filesystem::path tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav");
+        std::filesystem::path tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav").toStdPath();
 
         if (usingApi) {
             std::string file = audioMode == AudioMode::Song ? songFile : "fmodoutput.wav";
