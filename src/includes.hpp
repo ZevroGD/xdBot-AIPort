@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <asp/fs/std.hpp>
 // #include <Geode/loader/SettingEvent.hpp>
 
 #include <string>
@@ -60,7 +61,6 @@ public:
 
     static int getCurrentFrame(bool editor = false);
 
-    static void updateKeybinds();
 
     static void updateSeed(bool isRestart = false);
 
@@ -86,9 +86,7 @@ public:
     state state = none;
 
     std::unordered_map<CheckpointObject*, CheckpointData> checkpoints;
-    std::unordered_set<int> allKeybinds;
     std::unordered_set<int> playedFrames;
-    std::vector<int> keybinds[6];
 
     int lastAutoSaveFrame = 0;
     std::chrono::time_point<std::chrono::steady_clock> lastAutoSaveMS = std::chrono::steady_clock::now();

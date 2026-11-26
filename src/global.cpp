@@ -4,7 +4,6 @@
 #include <Geode/modify/CCTextInputNode.hpp>
 
 #ifdef GEODE_IS_WINDOWS
-#include <geode.custom-keybinds/include/Keybinds.hpp>
 #endif
 
 #include <random>
@@ -59,7 +58,7 @@ bool Global::hasIncompatibleMods() {
   #ifdef GEODE_IS_WINDOWS
 
   if (Mod* mod = Loader::get()->getLoadedMod("tobyadd.gdh")) {
-    std::filesystem::path configPath = mod->getSaveDir() / "config.json";
+    std::filesystem::path configPath = (mod->getSaveDir() / "config.json").toStdPath();
 	  using namespace nlohmann;
 
     if (std::filesystem::exists(configPath)) {
@@ -78,7 +77,7 @@ bool Global::hasIncompatibleMods() {
   #else
 
   if (Mod* mod = Loader::get()->getLoadedMod("tobyadd.gdh_mobile")) {
-    std::filesystem::path configPath = mod->getSaveDir() / "config.json";
+    std::filesystem::path configPath = (mod->getSaveDir() / "config.json").toStdPath();
 	  using namespace nlohmann;
     
     if (std::filesystem::exists(configPath)) {
@@ -183,26 +182,6 @@ int Global::getCurrentFrame(bool editor) {
   if (frame < 0) return 0;
 
   return frame;
-}
-
-void Global::updateKeybinds() {
-#ifdef GEODE_IS_WINDOWS
-
-  auto& g = Global::get();
-  for (size_t i = 0; i < 6; i++) {
-    auto keys = keybinds::BindManager::get()->getBindsFor(buttonIDs[i]);
-    std::vector<int> keysInts = {};
-
-    for (size_t j = 0; j < keys.size(); j++) {
-      keysInts.push_back(keys[j]->getHash());
-      g.allKeybinds.insert(keys[j]->getHash());
-    }
-
-    g.keybinds[i].clear();
-    for (int k = 0; k < keysInts.size(); k++)
-      g.keybinds[i].push_back(keysInts[k]);
-  }
-#endif
 }
 
 void Global::updateSeed(bool isRestart) {
@@ -353,8 +332,8 @@ $execute{
   }
 
   if (!g.mod->setSavedValue("defaults_set_12", true)) {
-    g.mod->setSettingValue<std::filesystem::path>("macros_folder", g.mod->getSaveDir() / "macros");
-    g.mod->setSettingValue<std::filesystem::path>("autosaves_folder", g.mod->getSaveDir() / "autosaves");
+    g.mod->setSettingValue<asp::fs::Path>("macros_folder", g.mod->getSaveDir() / "macros");
+    g.mod->setSettingValue<asp::fs::Path>("autosaves_folder", g.mod->getSaveDir() / "autosaves");
   }
 
   #ifdef GEODE_IS_ANDROID
@@ -396,7 +375,7 @@ $execute{
   }
 
   if (!g.mod->setSavedValue("defaults_set3", true)) {
-    g.mod->setSettingValue<std::filesystem::path>("render_folder", g.mod->getSaveDir() / "renders");
+    g.mod->setSettingValue<asp::fs::Path>("render_folder", g.mod->getSaveDir() / "renders");
     g.mod->setSavedValue("render_file_extension", std::string(".mp4"));
     g.mod->setSavedValue("render_sfx_volume", 1.f);
     g.mod->setSavedValue("render_music_volume", 1.f);
