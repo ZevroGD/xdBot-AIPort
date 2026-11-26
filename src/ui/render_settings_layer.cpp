@@ -300,8 +300,8 @@ bool RenderSettingsLayer::setup() {
     fadeInInput->setScale(0.5f);
     fadeInInput->setPosition(ccp(100, -32));
     fadeInInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_in_time").c_str());
-    fadeInInput->getInputNode()->setDelegate(this);
-    fadeInInput->getInputNode()->setAllowedChars("0123456789.");
+    fadeInInput->setCallback([this](std::string const&) { textChanged(nullptr); });
+    fadeInInput->setFilter("0123456789.");
     menu->addChild(fadeInInput);
     
     CCMenuItemToggler* toggle = CCMenuItemToggler::create(
@@ -342,16 +342,16 @@ bool RenderSettingsLayer::setup() {
     extensionInput->setScale(0.8f);
     extensionInput->setPosition(ccp(209, -5));
     extensionInput->setString(Mod::get()->getSavedValue<std::string>("render_file_extension").c_str());
-    extensionInput->getInputNode()->setDelegate(this);
-    extensionInput->getInputNode()->setAllowedChars("abcdefghijklmnñopqrstuvwxyz0123456789.");
+    extensionInput->setCallback([this](std::string const&) { textChanged(nullptr); });
+    extensionInput->setFilter("abcdefghijklmnñopqrstuvwxyz0123456789.");
     menu->addChild(extensionInput);
 
     fadeOutInput = TextInput::create(50.f, "s", "bigFont.fnt");
     fadeOutInput->setScale(0.5f);
     fadeOutInput->setPosition(ccp(100, -58));
     fadeOutInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_out_time").c_str());
-    fadeOutInput->getInputNode()->setDelegate(this);
-    fadeOutInput->getInputNode()->setAllowedChars("0123456789.");
+    fadeOutInput->setCallback([this](std::string const&) { textChanged(nullptr); });
+    fadeOutInput->setFilter("0123456789.");
     menu->addChild(fadeOutInput);
 
     toggle = CCMenuItemToggler::create(
@@ -474,15 +474,15 @@ bool RenderSettingsLayer::setup() {
         audioArgsInput->setID("disabled-input"_spr);
 
         extensionInput->setEnabled(false);
-        extensionInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        extensionInput->getPlaceholderLabel()->setOpacity(100);
         extensionInput->getBGSprite()->setOpacity(40);
 
         fadeOutInput->setEnabled(false);
-        fadeOutInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        fadeOutInput->getPlaceholderLabel()->setOpacity(100);
         fadeOutInput->getBGSprite()->setOpacity(40);
 
         fadeInInput->setEnabled(false);
-        fadeInInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        fadeInInput->getPlaceholderLabel()->setOpacity(100);
         fadeInInput->getBGSprite()->setOpacity(40);
 
         onlySongToggle->setCascadeOpacityEnabled(true);
