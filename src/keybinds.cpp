@@ -9,6 +9,7 @@
 
 #include <array>
 #include <string_view>
+#include <utility>
 
 #include <Geode/loader/GameEvent.hpp>
 #include <Geode/loader/SettingV3.hpp>
