@@ -207,9 +207,9 @@ bool Renderer::toggle() {
             return false;
         }
 
-        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("render_folder").toStdPath();
+        asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>("render_folder");
 
-        if (std::filesystem::exists(path))
+        if (path.exists())
             g.renderer.start();
         else {
             if (utils::file::createDirectoryAll(path).isOk())
