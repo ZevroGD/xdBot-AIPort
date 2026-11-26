@@ -168,7 +168,7 @@ private:
 		btn->setPosition({m_size.width / 2, 24});
 		m_buttonMenu->addChild(btn);
 
-		textChanged(nullptr);
+		textChanged();
 		updateInputs();
 
 		return true;
