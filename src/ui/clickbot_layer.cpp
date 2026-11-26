@@ -402,9 +402,12 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 	textFilter.files = { "*.mp3", "*.ogg" };
 	fileOptions.filters.push_back(textFilter);
 
-	file::pick(file::PickMode::OpenFile, { Mod::get()->getResourcesDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
-		if (res->isOk()) {
-			std::filesystem::path path = res->unwrapOrDefault();
+	fileOptions.defaultPath = Mod::get()->getResourcesDir();
+	file::pick(file::PickMode::OpenFile, std::move(fileOptions)).listen([this](file::PickResult* res) {
+		if (res && res->isOk()) {
+			auto picked = res->unwrap();
+			if (!picked) return;
+			std::filesystem::path path = picked->toStdPath();
 
 			filenameLabel->setString(path.filename().string().c_str());
 
@@ -427,7 +430,7 @@ void ClickSettingsLayer::onRestore(CCObject*) {
 
 	settings.disabled = false;
 	
-	std::filesystem::path path = Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button);
+	std::filesystem::path path = (Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button)).toStdPath();
 
 	filenameLabel->setString(path.filename().string().c_str());
 

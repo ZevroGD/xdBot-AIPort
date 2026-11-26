@@ -513,9 +513,9 @@ void RecordLayer::openPresets(CCObject*) {
 }
 
 void RecordLayer::onAutosaves(CCObject*) {
-    std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
+    asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>("autosaves_folder");
 
-    if (std::filesystem::exists(path))
+    if (path.exists())
         LoadMacroLayer::open(static_cast<geode::Popup<>*>(this), nullptr, true);
     else {
         FLAlertLayer::create("Error", "There was an error getting the folder. ID: 5", "Ok")->show();
