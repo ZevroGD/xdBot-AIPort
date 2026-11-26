@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <Geode/binding/TextInputDelegate.hpp>
 #include <asp/fs/std.hpp>
 // #include <Geode/loader/SettingEvent.hpp>
 
