@@ -7,6 +7,9 @@
 #include "hacks/layout_mode.hpp"
 #include "hacks/show_trajectory.hpp"
 
+#include <array>
+#include <string_view>
+
 #include <Geode/loader/GameEvent.hpp>
 #include <Geode/loader/SettingV3.hpp>
 
