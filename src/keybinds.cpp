@@ -14,7 +14,7 @@ static void onKeybind(bool down, bool repeat, std::string_view id) {
 #ifdef GEODE_IS_WINDOWS
     auto& g = Global::get();
 
-    if (!down || repeat ||
+    if (!down || (repeat && id != "keybind_step_frame") ||
         (LevelEditorLayer::get() && !g.mod->getSettingValue<bool>("editor_keybinds")) ||
         g.mod->getSettingValue<bool>("disable_keybinds")) {
         return;
