@@ -1,5 +1,7 @@
 #include "clickbot_layer.hpp"
 
+#include <utility>
+
 void ClickbotLayer::updateLabels() {
 	auto& g = Global::get();
 

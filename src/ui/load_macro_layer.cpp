@@ -3,6 +3,7 @@
 #include "macro_editor.hpp"
 
 #include <Geode/modify/CCMenu.hpp>
+#include <utility>
 
 class $modify(CCMenu) {
 	virtual bool ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
