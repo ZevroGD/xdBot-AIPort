@@ -64,9 +64,7 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
             g.mod->setSavedValue("render_hide_endscreen", false);
             g.mod->setSavedValue("render_hide_levelcomplete", false);
 
-	        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
-            CCObject* child;
-            CCARRAY_FOREACH(children, child) {
+            for (auto child : CCDirector::sharedDirector()->getRunningScene()->getChildrenExt()) {
                 if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(child)) {
                     layer->onClose(nullptr);
                     break;
@@ -130,7 +128,7 @@ bool RenderSettingsLayer::init() {
     argsInput = CCTextInputNode::create(150, 30, "args", "chatFont.fnt");
     argsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     argsInput->ignoreAnchorPointForPosition(true);
-    argsInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+    argsInput
     argsInput->setPosition(ccp(25, 86));
     argsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     argsInput->setMouseEnabled(true);
@@ -468,8 +466,8 @@ bool RenderSettingsLayer::init() {
     menu->addChild(btn);
 
     if (usingApi) {
-        argsInput->m_placeholderLabel->setOpacity(100);
-        audioArgsInput->m_placeholderLabel->setOpacity(100);
+        
+        
 
         argsInput->setID("disabled-input"_spr);
         audioArgsInput->setID("disabled-input"_spr);
