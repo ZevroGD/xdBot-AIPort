@@ -80,20 +80,22 @@ class $modify(PauseLayer) {
         );
         if (!btn) return;
 
-        if (!Loader::get()->isModLoaded("geode.node-ids")) {
-            auto* menu = CCMenu::create();
-            if (!menu) return;
-            menu->setID("button"_spr);
-            addChild(menu);
-            btn->setPosition({214, 88});
-            menu->addChild(btn);
-            return;
+        if (Loader::get()->isModLoaded("geode.node-ids")) {
+            if (auto* menu = this->getChildByID("right-button-menu")) {
+                menu->addChild(btn);
+                menu->updateLayout();
+                return;
+            }
         }
 
-        if (auto* menu = this->getChildByID("right-button-menu")) {
-            menu->addChild(btn);
-            menu->updateLayout();
-        }
+        // The node ID may be unavailable even when node-ids is installed.
+        // Fall back to a standalone menu rather than silently hiding xDBot.
+        auto* menu = CCMenu::create();
+        if (!menu) return;
+        menu->setID("button"_spr);
+        addChild(menu);
+        btn->setPosition({214, 88});
+        menu->addChild(btn);
     }
 };
 
