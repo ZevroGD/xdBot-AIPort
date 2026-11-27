@@ -45,7 +45,7 @@ class $modify(PlayLayer) {
         if (g.layoutMode)
             level->m_levelString = LayoutMode::getModifiedString(level->m_levelString);
 
-        if (!PlayLayer::init(level, b1, b2)) {
+        if (!PlayLayer::init(level, b1)) {
             if (g.layoutMode)
                 level->m_levelString = oldString;
 
