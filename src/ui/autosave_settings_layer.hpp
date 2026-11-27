@@ -1,6 +1,6 @@
 #include "../includes.hpp"
 
-class AutoSaveLayer : public geode::Popup<> {
+class AutoSaveLayer : public geode::Popup {
 
 private:
 
