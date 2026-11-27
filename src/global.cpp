@@ -58,7 +58,7 @@ bool Global::hasIncompatibleMods() {
   #ifdef GEODE_IS_WINDOWS
 
   if (Mod* mod = Loader::get()->getLoadedMod("tobyadd.gdh")) {
-    std::filesystem::path configPath = (mod->getSaveDir() / "config.json").toStdPath();
+    std::filesystem::path configPath = (mod->getSaveDir() / "config.json").toStdPath().unwrapOr(std::filesystem::path{});
 	  using namespace nlohmann;
 
     if (std::filesystem::exists(configPath)) {
@@ -77,7 +77,7 @@ bool Global::hasIncompatibleMods() {
   #else
 
   if (Mod* mod = Loader::get()->getLoadedMod("tobyadd.gdh_mobile")) {
-    std::filesystem::path configPath = (mod->getSaveDir() / "config.json").toStdPath();
+    std::filesystem::path configPath = (mod->getSaveDir() / "config.json").toStdPath().unwrapOr(std::filesystem::path{});
 	  using namespace nlohmann;
     
     if (std::filesystem::exists(configPath)) {
@@ -315,7 +315,7 @@ void Global::frameStepperOff() {
 PauseLayer* Global::getPauseLayer() {
   CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
   CCObject* child;
-  CCARRAY_FOREACH(children, child) {
+  for (auto child : CCArrayExt<CCObject*>(children)) {
     if (PauseLayer* pauseLayer = typeinfo_cast<PauseLayer*>(child))
       return pauseLayer;
   }
