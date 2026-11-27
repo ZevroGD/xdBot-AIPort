@@ -128,7 +128,7 @@ bool RenderSettingsLayer::init() {
     argsInput = CCTextInputNode::create(150, 30, "args", "chatFont.fnt");
     argsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     argsInput->ignoreAnchorPointForPosition(true);
-    argsInput
+
     argsInput->setPosition(ccp(25, 86));
     argsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     argsInput->setMouseEnabled(true);
@@ -164,7 +164,7 @@ bool RenderSettingsLayer::init() {
     audioArgsInput = CCTextInputNode::create(150, 30, "audio args", "chatFont.fnt");
     audioArgsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     audioArgsInput->ignoreAnchorPointForPosition(true);
-    audioArgsInput
+
     audioArgsInput->setPosition(ccp(18, 53));
     audioArgsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     audioArgsInput->setMouseEnabled(true);
@@ -198,7 +198,7 @@ bool RenderSettingsLayer::init() {
     videoArgsInput = CCTextInputNode::create(150, 30, "video args", "chatFont.fnt");
     videoArgsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     videoArgsInput->ignoreAnchorPointForPosition(true);
-    videoArgsInput
+
     videoArgsInput->setPosition({19, 22});
     videoArgsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     videoArgsInput->setMouseEnabled(true);
@@ -228,7 +228,7 @@ bool RenderSettingsLayer::init() {
     secondsInput = CCTextInputNode::create(150, 30, "sec", "chatFont.fnt");
     secondsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     secondsInput->ignoreAnchorPointForPosition(true);
-    secondsInput
+
     secondsInput->setPosition(ccp(50, -8));
     secondsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     secondsInput->setMouseEnabled(true);
