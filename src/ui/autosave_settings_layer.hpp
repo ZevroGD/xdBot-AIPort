@@ -21,7 +21,8 @@ private:
 		Mod::get()->setSavedValue("autosave_interval", str);
 	}
 	
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(250, 190, Utils::getTexture().c_str())) return false;
         setTitle("AutoSave");
 		m_title->setScale(0.575f);
 		m_title->setPositionY(171);
