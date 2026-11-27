@@ -94,7 +94,7 @@ public:
         if (macroName == "")
             return FLAlertLayer::create("Save Macro", "Give a <cl>name</c> to the macro.", "Ok")->show();
 
-        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath() / macroName;
+        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath().unwrapOr(std::filesystem::path{}) / macroName;
         std::string author = authorInput->getString();
         std::string desc = descInput->getString();
 
