@@ -22,7 +22,7 @@ private:
 
     CCMenuItemToggler* disableToggle = nullptr;
 
-    bool setup(std::string button, geode::Popup* layer) override;
+    bool setup() override;
 
 public:
 
