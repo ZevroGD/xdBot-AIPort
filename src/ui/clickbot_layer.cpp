@@ -407,11 +407,11 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 	fileOptions.filters.push_back(textFilter);
 
 	fileOptions.defaultPath = Mod::get()->getResourcesDir();
-	file::pick(file::PickMode::OpenFile, std::move(fileOptions)).listen([this](file::PickResult* res) {
-		if (res && res->isOk()) {
-			auto picked = res->unwrap();
-			if (!picked) return;
-			std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
+	async::spawn(file::pick(file::PickMode::OpenFile, std::move(fileOptions)), [this](Result<std::optional<asp::fs::Path>> result) {
+        if (!result.isOk()) return;
+        auto picked = result.unwrap();
+        if (!picked) return;
+        std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
 
 			filenameLabel->setString(path.filename().string().c_str());
 
@@ -419,8 +419,7 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 			saveSettings();
 
 			static_cast<ClickbotLayer*>(clickbotLayer)->updateLabels();
-		}
-		});
+    });
 }
 
 void ClickSettingsLayer::onRestore(CCObject*) {
