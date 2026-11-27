@@ -132,7 +132,7 @@ LoadMacroLayer* LoadMacroLayer::create(geode::Popup* layer, geode::Popup* layer2
 	ret->menuLayer = layer;
 	ret->mergeLayer = layer2;
 	ret->isAutosaves = autosaves;
-	if (ret->initAnchored(385, 291, Utils::getTexture().c_str())) {
+	if (ret->init()) {
 		ret->autorelease();
 		return ret;
 	}
@@ -221,7 +221,8 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 		});
 }
 
-bool LoadMacroLayer::setup() {
+bool LoadMacroLayer::init() {
+	if (!geode::Popup::init(385, 291, Utils::getTexture().c_str())) return false;
 
 	#ifdef GEODE_IS_ANDROID
 	invertSort = true;
