@@ -18,7 +18,8 @@ private:
 
 	TextInput* input = nullptr;
 	
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(250, 180, Utils::getTexture().c_str())) return false;
         setTitle("Show Trajectory");
 
     	Utils::setBackgroundColor(m_bgSprite);
