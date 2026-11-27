@@ -73,7 +73,7 @@ public:
 
 protected:
 
-	bool setup() override;
+	bool init();
 
 	~RecordLayer() override {
 		cocos2d::CCTouchDispatcher::get()->unregisterForcePrio(this);
