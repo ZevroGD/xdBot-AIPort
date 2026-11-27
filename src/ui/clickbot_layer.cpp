@@ -21,7 +21,8 @@ void ClickbotLayer::updateLabels() {
 
 }
 
-bool ClickbotLayer::setup() {
+bool ClickbotLayer::init() {
+    if (!geode::Popup::init(432, 250, Utils::getTexture().c_str())) return false;
 	setTitle("ClickBot");
 	m_title->setPositionY(m_title->getPositionY() + 5);
 	
