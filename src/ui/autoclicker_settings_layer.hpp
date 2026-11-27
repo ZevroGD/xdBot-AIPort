@@ -45,7 +45,8 @@ private:
 		releaseLbl2->setString(fmt::format("{:.3f}s", dt * g.releaseFor2).c_str());
 	}
 	
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(250, 240, Utils::getTexture().c_str())) return false;
         setTitle("Autoclicker");
 		m_title->setScale(0.625f);
 		m_title->setPositionY(224);
