@@ -24,7 +24,7 @@ public:
 
 private:
 
-	bool setup() override;
+	bool init();
 
 public:
 
