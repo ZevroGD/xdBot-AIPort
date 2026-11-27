@@ -64,27 +64,25 @@ const std::vector<std::vector<RecordSetting>> settings {
 };
 
 class $modify(PauseLayer) {
-    void customSetup() {
-        PauseLayer::customSetup();
+    void onEnter() {
+        PauseLayer::onEnter();
 
         #ifdef GEODE_IS_WINDOWS
-
         if (!Mod::get()->getSavedValue<bool>("menu_show_button")) return;
-
         #endif
 
-        CCSprite* sprite = nullptr;
-
-        sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+        auto* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+        if (!sprite) return;
         sprite->setScale(0.35f);
 
+        auto* btn = CCMenuItemSpriteExtra::create(
+            sprite, this, menu_selector(RecordLayer::openMenu2)
+        );
+        if (!btn) return;
 
-        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(sprite,
-            this,
-            menu_selector(RecordLayer::openMenu2));
-        
         if (!Loader::get()->isModLoaded("geode.node-ids")) {
-            CCMenu* menu = CCMenu::create();
+            auto* menu = CCMenu::create();
+            if (!menu) return;
             menu->setID("button"_spr);
             addChild(menu);
             btn->setPosition({214, 88});
@@ -92,9 +90,10 @@ class $modify(PauseLayer) {
             return;
         }
 
-        CCNode* menu = this->getChildByID("right-button-menu");
-        menu->addChild(btn);
-        menu->updateLayout();
+        if (auto* menu = this->getChildByID("right-button-menu")) {
+            menu->addChild(btn);
+            menu->updateLayout();
+        }
     }
 };
 
