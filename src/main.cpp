@@ -224,11 +224,11 @@ class $modify(BGLHook, GJBaseGameLayer) {
       }
 
       if (g.previousFrame == frame && frame != 0 && g.macro.xdBotMacro)
-        return GJBaseGameLayer::processCommands(dt);
+        return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     }
 
-    GJBaseGameLayer::processCommands(dt);
+    GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     if (g.state == state::none)
       return;
