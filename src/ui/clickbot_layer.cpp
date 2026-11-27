@@ -411,7 +411,7 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 		if (res && res->isOk()) {
 			auto picked = res->unwrap();
 			if (!picked) return;
-			std::filesystem::path path = picked->toStdPath();
+			std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
 
 			filenameLabel->setString(path.filename().string().c_str());
 
@@ -434,7 +434,7 @@ void ClickSettingsLayer::onRestore(CCObject*) {
 
 	settings.disabled = false;
 	
-	std::filesystem::path path = (Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button)).toStdPath();
+	std::filesystem::path path = (Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button)).toStdPath().unwrapOr(std::filesystem::path{});
 
 	filenameLabel->setString(path.filename().string().c_str());
 
