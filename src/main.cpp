@@ -7,7 +7,6 @@
 
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/PauseLayer.hpp>
 
 $execute {
 
@@ -59,6 +58,14 @@ class $modify(PlayLayer) {
   void onQuit() {
     if (Mod::get()->getSettingValue<bool>("disable_speedhack") && Global::get().speedhackEnabled)
       Global::toggleSpeedhack();
+
+    Macro::resetState();
+
+    Loader::get()->queueInMainThread([] {
+      auto& g = Global::get();
+      if (g.renderer.recording) g.renderer.stop();
+      if (g.renderer.recordingAudio) g.renderer.stopAudio();
+    });
 
     PlayLayer::onQuit();
   }
@@ -524,48 +531,3 @@ class $modify(BGLHook, GJBaseGameLayer) {
   }
 };
 
-class $modify(PauseLayer) {
-
-  void onPracticeMode(CCObject * sender) {
-    PauseLayer::onPracticeMode(sender);
-    if (Global::get().state != state::none) PlayLayer::get()->resetLevel();
-  }
-
-  void onNormalMode(CCObject * sender) {
-    PauseLayer::onNormalMode(sender);
-    auto& g = Global::get();
-
-    g.checkpoints.clear();
-
-    if (g.restart) {
-      if (PlayLayer* pl = PlayLayer::get())
-        pl->resetLevel();
-    }
-
-  }
-
-  void onQuit(CCObject * sender) {
-    PauseLayer::onQuit(sender);
-
-    Macro::resetState();
-
-    Loader::get()->queueInMainThread([] {
-      auto& g = Global::get();
-      if (g.renderer.recording) g.renderer.stop();
-      if (g.renderer.recordingAudio) g.renderer.stopAudio();
-    });
-  }
-
-  void goEdit() {
-    PauseLayer::goEdit();
-
-    Macro::resetState();
-    
-    Loader::get()->queueInMainThread([] {
-      auto& g = Global::get();
-      if (g.renderer.recording) g.renderer.stop();
-      if (g.renderer.recordingAudio) g.renderer.stopAudio();
-    });
-  }
-
-};
