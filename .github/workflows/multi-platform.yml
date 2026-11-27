@@ -34,11 +34,13 @@ jobs:
       - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
         with:
+          sdk: given
           bindings: geode-sdk/bindings
           build-config: ${{ matrix.config.build-type || 'Release' }}
           export-pdb: true
           bindings-ref: main
           combine: true
+          android-min-sdk: 23
           target: ${{ matrix.config.target }}
 
   package:
