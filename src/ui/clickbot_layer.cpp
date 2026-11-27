@@ -292,7 +292,7 @@ ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup*
 	ClickSettingsLayer* ret = new ClickSettingsLayer();
 	ret->button = button;
 	ret->clickbotLayer = layer;
-	if (ret->initAnchored(250, 173, Utils::getTexture().c_str())) {
+	if (ret->init()) {
 		ret->autorelease();
 		return ret;
 	}
