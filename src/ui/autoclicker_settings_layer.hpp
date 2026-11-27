@@ -196,8 +196,8 @@ private:
 		holdInput->getPlaceholderLabel()->setOpacity(g.autoclickerP1 ? 255 : 100);
 		if (!g.autoclickerP1) {
 			holdInput->unfocus();
-			holdInput
-			holdInput
+
+
 		}
 
 		holdTitle2->setOpacity(g.autoclickerP2 ? 255 : 100);
@@ -207,8 +207,8 @@ private:
 		holdInput2->getPlaceholderLabel()->setOpacity(g.autoclickerP2 ? 255 : 100);
 		if (!g.autoclickerP2) {
 			holdInput2->unfocus();
-			holdInput2
-			holdInput2
+
+
 		}
 
 		releaseTitle->setOpacity(g.autoclickerP1 ? 255 : 100);
@@ -218,8 +218,8 @@ private:
 		releaseInput->getPlaceholderLabel()->setOpacity(g.autoclickerP1 ? 255 : 100);
 		if (!g.autoclickerP1) {
 			releaseInput->unfocus();
-			releaseInput
-			releaseInput
+
+
 		}
 
 		releaseTitle2->setOpacity(g.autoclickerP2 ? 255 : 100);
@@ -229,8 +229,8 @@ private:
 		releaseInput2->getPlaceholderLabel()->setOpacity(g.autoclickerP2 ? 255 : 100);
 		if (!g.autoclickerP2) {
 			releaseInput2->unfocus();
-			releaseInput2
-			releaseInput2
+
+
 		}
 	}
 
