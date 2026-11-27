@@ -28,7 +28,7 @@ const int sidesButtons[4] = { 1, 2, 4, 5 };
 #define STATIC_CREATE(class, width, height) \
     static class* create() { \
         class* ret = new class(); \
-        if (ret->initAnchored(width, height, Utils::getTexture().c_str())) { \
+        if (ret->init()) { \
             ret->autorelease(); \
             return ret; \
         } \
