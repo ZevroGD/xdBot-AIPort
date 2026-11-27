@@ -15,7 +15,7 @@ class MacroEditLayer : public geode::Popup {
 
 private:
     
-    bool setup();
+    bool init();
 
     void onClose(CCObject*) override;
 
