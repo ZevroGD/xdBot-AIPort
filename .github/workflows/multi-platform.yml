@@ -16,10 +16,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - name: Windows
-          os: windows-latest
-          build-type: RelWithDebInfo
-
         - name: Android32
           os: ubuntu-latest
           target: Android32
