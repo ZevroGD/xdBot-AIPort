@@ -6,6 +6,9 @@ on:
     branches:
       - "main"
       - "port/gd-2.2091"
+  pull_request:
+    branches:
+      - "main"
 
 jobs:
   build:
