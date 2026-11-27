@@ -26,7 +26,7 @@ class $modify(CCMenu) {
 	}
 };
 
-void LoadMacroLayer::open(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
+void LoadMacroLayer::open(geode::Popup* layer, geode::Popup* layer2, bool autosaves) {
 	asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder");
 
 	if (!path.exists()) {
@@ -127,9 +127,12 @@ void LoadMacroLayer::onSelectAll(CCObject* obj) {
 	}
 }
 
-LoadMacroLayer* LoadMacroLayer::create(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
+LoadMacroLayer* LoadMacroLayer::create(geode::Popup* layer, geode::Popup* layer2, bool autosaves) {
 	LoadMacroLayer* ret = new LoadMacroLayer();
-	if (ret->initAnchored(385, 291, layer, layer2, autosaves, Utils::getTexture().c_str())) {
+	ret->menuLayer = layer;
+	ret->mergeLayer = layer2;
+	ret->isAutosaves = autosaves;
+	if (ret->initAnchored(385, 291, Utils::getTexture().c_str())) {
 		ret->autorelease();
 		return ret;
 	}
@@ -218,7 +221,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 		});
 }
 
-bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
+bool LoadMacroLayer::setup() {
 
 	#ifdef GEODE_IS_ANDROID
 	invertSort = true;
@@ -230,9 +233,7 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 
 	Utils::setBackgroundColor(m_bgSprite);
 
-	menuLayer = layer;
-	mergeLayer = layer2;
-	isAutosaves = autosaves;
+
 	isMerge = mergeLayer != nullptr;
 
 	setTitle(isMerge ? "Merge Macro" : "Load Macro");
@@ -552,7 +553,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	}
 }
 
-MacroCell* MacroCell::create(std::filesystem::path path, std::string name, std::time_t date, geode::Popup<>* menuLayer, geode::Popup<>* mergeLayer, CCLayer* loadLayer) {
+MacroCell* MacroCell::create(std::filesystem::path path, std::string name, std::time_t date, geode::Popup* menuLayer, geode::Popup* mergeLayer, CCLayer* loadLayer) {
 	MacroCell* ret = new MacroCell();
 	if (!ret->init(path, name, date, menuLayer, mergeLayer, loadLayer)) {
 		delete ret;
@@ -563,7 +564,7 @@ MacroCell* MacroCell::create(std::filesystem::path path, std::string name, std::
 	return ret;
 }
 
-bool MacroCell::init(std::filesystem::path path, std::string name, std::time_t date, geode::Popup<>* menuLayer, geode::Popup<>* mergeLayer, CCLayer* loadLayer) {
+bool MacroCell::init(std::filesystem::path path, std::string name, std::time_t date, geode::Popup* menuLayer, geode::Popup* mergeLayer, CCLayer* loadLayer) {
 
 	this->path = path;
 	this->date = date;
