@@ -22,7 +22,7 @@ private:
 
     CCMenuItemToggler* disableToggle = nullptr;
 
-    bool setup() override;
+    bool init();
 
 public:
 
@@ -84,7 +84,7 @@ class ClickbotLayer : public geode::Popup {
 
 private:
 
-    bool setup() override;
+    bool init();
 
 public:
 
