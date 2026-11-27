@@ -64,8 +64,8 @@ const std::vector<std::vector<RecordSetting>> settings {
 };
 
 class $modify(PauseLayer) {
-    void onEnter() {
-        PauseLayer::onEnter();
+    void onEnterTransitionDidFinish() {
+        PauseLayer::onEnterTransitionDidFinish();
 
         #ifdef GEODE_IS_WINDOWS
         if (!Mod::get()->getSavedValue<bool>("menu_show_button")) return;
