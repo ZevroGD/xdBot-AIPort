@@ -1,7 +1,7 @@
 #include "../includes.hpp"
 #include "record_layer.hpp"
 
-class RenderPresetsLayer : public geode::Popup<> {
+class RenderPresetsLayer : public geode::Popup {
 
 public:
 
@@ -9,13 +9,16 @@ public:
 
 private:
 
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(243, 231, Utils::getTexture().c_str())) return false;
         setTitle("Render Presets");
+        CCMenu* buttonMenu = CCMenu::create();
+        m_mainLayer->addChild(buttonMenu);
 
         CCScale9Sprite* bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
         bg->setColor({ 0,0,0 });
         bg->setOpacity(75);
-        bg->setPosition({m_size.width / 2, 116.5});
+        bg->setPosition({121.5f, 116.5});
         bg->setContentSize({ 213, 151 });
         m_mainLayer->addChild(bg);
 
@@ -39,7 +42,7 @@ private:
             CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderPresetsLayer::onLoad));
             btn->setPosition({123, height});
             btn->setID(id.c_str());
-            m_buttonMenu->addChild(btn);
+            buttonMenu->addChild(btn);
 
             if (!Mod::get()->hasSavedValue(id)) {
                 lbl->setString("N/A");
@@ -63,7 +66,7 @@ private:
 
         ButtonSprite* btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.75f);
-        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(btnSpr, this, menu_selector(RenderPresetsLayer::onClose));
+        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(btnSpr, this, menu_selector(RenderPresetsLayer::close));
         btn->setPosition({m_size.width / 2, 22});
         m_buttonMenu->addChild(btn);
 
@@ -85,6 +88,8 @@ private:
 
         return true;
     }
+
+    void close(CCObject*) { keyBackClicked(); }
 
     void update() {
         onClose(nullptr);
