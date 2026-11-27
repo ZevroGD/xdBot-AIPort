@@ -24,7 +24,7 @@ class ButtonEditLayer : public geode::Popup {
 
 private:
     
-    bool setup() override;
+    bool init();
 
 public:
 
