@@ -82,7 +82,8 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
     );
 }
 
-bool RenderSettingsLayer::setup() {
+bool RenderSettingsLayer::init() {
+    if (!geode::Popup::init(396, 277, Utils::getTexture().c_str())) return false;
     setTitle("Render Settings");
 
     bool usingApi = Renderer::shouldUseAPI();
