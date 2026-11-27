@@ -301,7 +301,8 @@ ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup*
 	return nullptr;
 }
 
-bool ClickSettingsLayer::setup() {
+bool ClickSettingsLayer::init() {
+    if (!geode::Popup::init(250, 173, Utils::getTexture().c_str())) return false;
 	cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
     m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
     m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
