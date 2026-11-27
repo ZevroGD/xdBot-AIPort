@@ -766,7 +766,6 @@ bool RecordLayer::init() {
     widthInput = CCTextInputNode::create(150, 30, "Width", "chatFont.fnt");
     widthInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     widthInput->ignoreAnchorPointForPosition(true);
-    widthInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
     widthInput->setPosition(ccp(-157, -31));
     widthInput->setMaxLabelScale(0.7f);
     widthInput->setMouseEnabled(true);
@@ -781,7 +780,6 @@ bool RecordLayer::init() {
     heightInput = CCTextInputNode::create(150, 30, "Height", "chatFont.fnt");
     heightInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     heightInput->ignoreAnchorPointForPosition(true);
-    heightInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
     heightInput->setPosition(ccp(-72.5, -31));
     heightInput->setMaxLabelScale(0.7f);
     heightInput->setMouseEnabled(true);
@@ -796,7 +794,6 @@ bool RecordLayer::init() {
     bitrateInput = CCTextInputNode::create(150, 30, "br", "chatFont.fnt");
     bitrateInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     bitrateInput->ignoreAnchorPointForPosition(true);
-    bitrateInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
     bitrateInput->setPosition(ccp(-185.5, -59));
     bitrateInput->setMaxLabelScale(0.7f);
     bitrateInput->setMouseEnabled(true);
@@ -839,7 +836,6 @@ bool RecordLayer::init() {
     codecInput = CCTextInputNode::create(150, 30, "Codec", "chatFont.fnt");
     codecInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     codecInput->ignoreAnchorPointForPosition(true);
-    codecInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
     codecInput->setPosition(ccp(-70.5, -62));
     codecInput->setMouseEnabled(true);
     codecInput->setTouchEnabled(true);
@@ -854,8 +850,6 @@ bool RecordLayer::init() {
     fpsInput = CCTextInputNode::create(150, 30, "FPS", "chatFont.fnt");
     fpsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     fpsInput->ignoreAnchorPointForPosition(true);
-    fpsInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
-    fpsInput->getPlaceholderLabel()->setScale(0.6);
     fpsInput->setPosition(ccp(-133, -59));
     fpsInput->setMaxLabelScale(0.7f);
     fpsInput->setMouseEnabled(true);
@@ -1077,8 +1071,6 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         speedhackInput->setPosition(ccp(127.5, yPos));
         speedhackInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
         speedhackInput->ignoreAnchorPointForPosition(true);
-        speedhackInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
-        speedhackInput->getPlaceholderLabel()->setScale(0.6);
         speedhackInput->setMaxLabelScale(0.7f);
         speedhackInput->setMouseEnabled(true);
         speedhackInput->setTouchEnabled(true);
@@ -1109,8 +1101,6 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         tpsInput->setPosition(ccp(133.5, yPos));
         tpsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
         tpsInput->ignoreAnchorPointForPosition(true);
-        tpsInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
-        tpsInput->getPlaceholderLabel()->setScale(0.6);
         tpsInput->setMaxLabelScale(0.7f);
         tpsInput->setMouseEnabled(true);
         tpsInput->setTouchEnabled(true);
@@ -1141,8 +1131,6 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         seedInput->setPosition(ccp(109.5, yPos));
         seedInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
         seedInput->ignoreAnchorPointForPosition(true);
-        seedInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
-        seedInput->getPlaceholderLabel()->setScale(0.6);
         seedInput->setMaxLabelScale(0.7f);
         seedInput->setMouseEnabled(true);
         seedInput->setTouchEnabled(true);
@@ -1173,8 +1161,6 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         respawnInput->setPosition(ccp(127.5, yPos));
         respawnInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
         respawnInput->ignoreAnchorPointForPosition(true);
-        respawnInput->getPlaceholderLabel()->setAnchorPoint({ 0.5f, 0.5f });
-        respawnInput->getPlaceholderLabel()->setScale(0.6);
         respawnInput->setMaxLabelScale(0.7f);
         respawnInput->setMouseEnabled(true);
         respawnInput->setTouchEnabled(true);
@@ -1250,7 +1236,6 @@ void RecordLayer::updateTPS() {
         tpsInput->setID("");
         tpsBg->setOpacity(75);
         tpsToggle->setEnabled(true);
-        tpsInput->getPlaceholderLabel()->setOpacity(255);
 
         tpsInput->detachWithIME();
         tpsInput->onClickTrackNode(false);
@@ -1266,7 +1251,6 @@ void RecordLayer::updateTPS() {
         tpsInput->setID("disabled-input"_spr);
         tpsBg->setOpacity(30);
         tpsToggle->setEnabled(false);
-        tpsInput->getPlaceholderLabel()->setOpacity(120);
 
         tpsInput->detachWithIME();
         tpsInput->onClickTrackNode(false);
