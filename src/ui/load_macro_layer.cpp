@@ -153,7 +153,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 		if (res && res->isOk()) {
 			auto picked = res->unwrap();
 			if (!picked) return;
-			std::filesystem::path path = picked->toStdPath();
+			std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
 
 			auto& g = Global::get();
 			Macro tempMacro;
@@ -188,7 +188,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 			std::string name = path.filename().string().substr(0, path.filename().string().find_last_of('.'));
 
-			std::filesystem::path newPath = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath() / name;
+			std::filesystem::path newPath = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath().unwrapOr(std::filesystem::path{}) / name;
 
 			std::string pathString = newPath.string();
 
@@ -422,7 +422,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>(isAutosaves ? "autosaves_folder" : "macros_folder");
 	std::vector<std::filesystem::path> macros;
 	for (auto const& entry : file::readDirectory(path).unwrapOrDefault())
-		macros.push_back(entry.toStdPath());
+		macros.push_back(entry.toStdPath().unwrapOr(std::filesystem::path{}));
 
 	CCArray* cells = CCArray::create();
 
@@ -473,7 +473,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	cocos2d::ccColor3B color1 = ccc3(std::max(0, color.r - 70), std::max(0, color.g - 70), std::max(0, color.b - 70));
 	cocos2d::ccColor3B color2 = ccc3(std::max(0, color.r - 55), std::max(0, color.g - 55), std::max(0, color.b - 55));
 
-	CCARRAY_FOREACH(children, child) {
+	for (auto child : CCArrayExt<CCObject*>(children)) {
 		if (GenericListCell* cell = typeinfo_cast<GenericListCell*>(child)) {
 			allMacros.push_back(static_cast<MacroCell*>(cell->getChildren()->objectAtIndex(2)));
 
