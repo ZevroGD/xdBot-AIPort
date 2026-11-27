@@ -717,7 +717,7 @@ void MacroCell::handleLoad() {
 
     g.macro.xdBotMacro = g.macro.botInfo.name == "xdBot";
 
-	loadLayer->keyBackClicked();
+	loadLayer->removeFromParentAndCleanup(true);
 
 	RecordLayer* newLayer = nullptr;
 
