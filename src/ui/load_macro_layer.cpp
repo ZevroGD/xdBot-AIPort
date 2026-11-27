@@ -149,11 +149,11 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 	fileOptions.filters.push_back(textFilter);
 
 	fileOptions.defaultPath = dirs::getGameDir();
-	file::pick(file::PickMode::OpenFile, std::move(fileOptions)).listen([this](file::PickResult* res) {
-		if (res && res->isOk()) {
-			auto picked = res->unwrap();
-			if (!picked) return;
-			std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
+	async::spawn(file::pick(file::PickMode::OpenFile, std::move(fileOptions)), [this](Result<std::optional<asp::fs::Path>> result) {
+        if (!result.isOk()) return;
+        auto picked = result.unwrap();
+        if (!picked) return;
+        std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
 
 			auto& g = Global::get();
 			Macro tempMacro;
@@ -205,7 +205,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 			pathString += ".gdr.json";
 
-			std::ofstream f2(Utils::widen(pathString), std::ios::binary);
+			std::ofstream f2(pathString, std::ios::binary);
 			auto data = tempMacro.exportData(true);
 
 			f2.write(reinterpret_cast<const char*>(data.data()), data.size());
@@ -217,8 +217,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 				FLAlertLayer::create("Warning", "<cl>.xd</c> extension macros may not function correctly in this version.", "Ok")->show();
 
 			Notification::create("Macro Imported", NotificationIcon::Success)->show();
-		}
-		});
+    });
 }
 
 bool LoadMacroLayer::init() {
@@ -704,7 +703,7 @@ void MacroCell::handleLoad() {
 
 		if (mergeLayer) {
 			typeinfo_cast<MacroEditLayer*>(mergeLayer)->mergeMacro(newMacro.inputs, players, static_cast<LoadMacroLayer*>(loadLayer)->owToggle->isToggled());
-			loadLayer->keyBackClicked();
+			loadLayer->removeFromParentAndCleanup(true);
 		}
 
 		return;
@@ -723,7 +722,7 @@ void MacroCell::handleLoad() {
 	RecordLayer* newLayer = nullptr;
 
 	if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(menuLayer)) {
-		layer->keyBackClicked();
+		layer->onClose(nullptr);
 		newLayer = RecordLayer::openMenu(true);
 	}
 
