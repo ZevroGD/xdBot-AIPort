@@ -114,7 +114,7 @@ void MacroEditLayer::updateHover(cocos2d::CCPoint pos) {
 }
 
 bool MacroEditLayer::init() {
-    if (!geode::Popup::init(432, 250, Utils::getTexture().c_str())) return false;
+    if (!geode::Popup::init(438, 247, Utils::getTexture().c_str())) return false;
     Utils::setBackgroundColor(m_bgSprite);
     
     CCMenu* menu = CCMenu::create();
