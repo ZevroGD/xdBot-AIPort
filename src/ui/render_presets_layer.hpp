@@ -61,14 +61,14 @@ private:
             btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderPresetsLayer::onSave));
             btn->setPosition({183, height});
             btn->setID(id.c_str());
-            m_buttonMenu->addChild(btn);
+            buttonMenu->addChild(btn);
         }
 
         ButtonSprite* btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.75f);
         CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(btnSpr, this, menu_selector(RenderPresetsLayer::close));
-        btn->setPosition({m_size.width / 2, 22});
-        m_buttonMenu->addChild(btn);
+        btn->setPosition({121.5f, 22});
+        buttonMenu->addChild(btn);
 
         CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
         spr->setScale(0.525f);
@@ -84,7 +84,7 @@ private:
             menu_selector(RenderPresetsLayer::openRendersFolder)
         );
         btn->setPosition({18, 18});
-        m_buttonMenu->addChild(btn);
+        buttonMenu->addChild(btn);
 
         return true;
     }
@@ -92,7 +92,7 @@ private:
     void close(CCObject*) { keyBackClicked(); }
 
     void update() {
-        onClose(nullptr);
+        close(nullptr);
 
         Loader::get()->queueInMainThread([] {
             CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
