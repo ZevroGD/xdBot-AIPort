@@ -77,7 +77,7 @@ public:
         if (Global::get().macro.inputs.empty())
             return FLAlertLayer::create("Save Macro", "You can't save an <cl>empty</c> macro.", "Ok")->show();
 
-        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath();
+        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath().unwrapOr(std::filesystem::path{});
 
         if (!std::filesystem::exists(path)) {
             if (!utils::file::createDirectoryAll(asp::fs::Path::fromStdPath(path)).isOk())
