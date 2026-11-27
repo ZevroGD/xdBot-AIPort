@@ -1,33 +1,6 @@
 #include "../includes.hpp"
 #include "game_ui.hpp"
 
-#include <Geode/modify/PlayLayer.hpp>
-
-class $modify(PlayLayer) {
-
-    struct Fields {
-        CCLabelBMFont* frameLabel = nullptr;
-    };
-
-    void postUpdate(float dt) {
-        PlayLayer::postUpdate(dt);
-        auto& g = Global::get();
-
-        if (g.state != state::none && g.frameLabel && !g.renderer.recording)
-            m_fields->frameLabel->setString(("Frame: " + std::to_string(Global::getCurrentFrame())).c_str());
-    }
-
-    bool init(GJGameLevel * level, bool b1) {
-        if (!PlayLayer::init(level, b1)) return false;
-
-        Interface::addLabels(this);
-        Interface::addButtons(this);
-
-        m_fields->frameLabel = static_cast<CCLabelBMFont*>(getChildByID("frame-label"_spr));
-
-        return true;
-    }
-};
 
 void Interface::addLabels(PlayLayer* pl) {
     CCLabelBMFont* lbl = CCLabelBMFont::create("", "chatFont.fnt");
