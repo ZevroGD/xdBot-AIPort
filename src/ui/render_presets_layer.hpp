@@ -1,7 +1,7 @@
 #include "../includes.hpp"
 #include "record_layer.hpp"
 
-class RenderPresetsLayer : public geode::Popup<> {
+class RenderPresetsLayer : public geode::Popup {
 
 public:
 
@@ -9,13 +9,16 @@ public:
 
 private:
 
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(243, 231, Utils::getTexture().c_str())) return false;
         setTitle("Render Presets");
+        CCMenu* buttonMenu = CCMenu::create();
+        m_mainLayer->addChild(buttonMenu);
 
         CCScale9Sprite* bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
         bg->setColor({ 0,0,0 });
         bg->setOpacity(75);
-        bg->setPosition({m_size.width / 2, 116.5});
+        bg->setPosition({121.5f, 116.5});
         bg->setContentSize({ 213, 151 });
         m_mainLayer->addChild(bg);
 
@@ -39,7 +42,7 @@ private:
             CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderPresetsLayer::onLoad));
             btn->setPosition({123, height});
             btn->setID(id.c_str());
-            m_buttonMenu->addChild(btn);
+            buttonMenu->addChild(btn);
 
             if (!Mod::get()->hasSavedValue(id)) {
                 lbl->setString("N/A");
@@ -58,14 +61,14 @@ private:
             btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderPresetsLayer::onSave));
             btn->setPosition({183, height});
             btn->setID(id.c_str());
-            m_buttonMenu->addChild(btn);
+            buttonMenu->addChild(btn);
         }
 
         ButtonSprite* btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.75f);
-        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(btnSpr, this, menu_selector(RenderPresetsLayer::onClose));
-        btn->setPosition({m_size.width / 2, 22});
-        m_buttonMenu->addChild(btn);
+        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(btnSpr, this, menu_selector(RenderPresetsLayer::close));
+        btn->setPosition({121.5f, 22});
+        buttonMenu->addChild(btn);
 
         CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
         spr->setScale(0.525f);
@@ -81,13 +84,15 @@ private:
             menu_selector(RenderPresetsLayer::openRendersFolder)
         );
         btn->setPosition({18, 18});
-        m_buttonMenu->addChild(btn);
+        buttonMenu->addChild(btn);
 
         return true;
     }
 
+    void close(CCObject*) { keyBackClicked(); }
+
     void update() {
-        onClose(nullptr);
+        close(nullptr);
 
         Loader::get()->queueInMainThread([] {
             CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
@@ -104,9 +109,9 @@ private:
     }
 
     void openRendersFolder(CCObject*) {
-        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
+        asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>("render_folder");
 
-        if (std::filesystem::exists(path))
+        if (path.exists())
             file::openFolder(path);
         else if (geode::utils::file::createDirectoryAll(path).isOk())
             file::openFolder(path);

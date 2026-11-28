@@ -1,6 +1,9 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <Geode/utils/async.hpp>
+#include <Geode/binding/TextInputDelegate.hpp>
+#include <asp/fs/std.hpp>
 // #include <Geode/loader/SettingEvent.hpp>
 
 #include <string>
@@ -23,19 +26,10 @@ const std::map<int, int> buttonIndex[2] = { { {1, 0}, {2, 1}, {3, 2} }, { {1, 3}
 
 const int sidesButtons[4] = { 1, 2, 4, 5 };
 
-const std::string buttonIDs[6] = {
-    "robtop.geometry-dash/jump-p1",
-    "robtop.geometry-dash/move-left-p1",
-    "robtop.geometry-dash/move-right-p1",
-    "robtop.geometry-dash/jump-p2",
-    "robtop.geometry-dash/move-left-p2",
-    "robtop.geometry-dash/move-right-p2"
-};
-
 #define STATIC_CREATE(class, width, height) \
     static class* create() { \
         class* ret = new class(); \
-        if (ret->initAnchored(width, height, Utils::getTexture().c_str())) { \
+        if (ret->init()) { \
             ret->autorelease(); \
             return ret; \
         } \
@@ -60,7 +54,6 @@ public:
 
     static int getCurrentFrame(bool editor = false);
 
-    static void updateKeybinds();
 
     static void updateSeed(bool isRestart = false);
 
@@ -79,16 +72,14 @@ public:
     static PauseLayer* getPauseLayer();
 
     Mod* mod = Mod::get();
-    geode::Popup<>* layer = nullptr;
+    geode::Popup* layer = nullptr;
 
     Macro macro;
     Renderer renderer;
     state state = none;
 
     std::unordered_map<CheckpointObject*, CheckpointData> checkpoints;
-    std::unordered_set<int> allKeybinds;
     std::unordered_set<int> playedFrames;
-    std::vector<int> keybinds[6];
 
     int lastAutoSaveFrame = 0;
     std::chrono::time_point<std::chrono::steady_clock> lastAutoSaveMS = std::chrono::steady_clock::now();

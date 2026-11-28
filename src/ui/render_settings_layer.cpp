@@ -64,9 +64,7 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
             g.mod->setSavedValue("render_hide_endscreen", false);
             g.mod->setSavedValue("render_hide_levelcomplete", false);
 
-	        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
-            CCObject* child;
-            CCARRAY_FOREACH(children, child) {
+            for (auto child : CCDirector::sharedDirector()->getRunningScene()->getChildrenExt()) {
                 if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(child)) {
                     layer->onClose(nullptr);
                     break;
@@ -82,7 +80,8 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
     );
 }
 
-bool RenderSettingsLayer::setup() {
+bool RenderSettingsLayer::init() {
+    if (!geode::Popup::init(396, 277, Utils::getTexture().c_str())) return false;
     setTitle("Render Settings");
 
     bool usingApi = Renderer::shouldUseAPI();
@@ -129,7 +128,7 @@ bool RenderSettingsLayer::setup() {
     argsInput = CCTextInputNode::create(150, 30, "args", "chatFont.fnt");
     argsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     argsInput->ignoreAnchorPointForPosition(true);
-    argsInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+
     argsInput->setPosition(ccp(25, 86));
     argsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     argsInput->setMouseEnabled(true);
@@ -165,7 +164,7 @@ bool RenderSettingsLayer::setup() {
     audioArgsInput = CCTextInputNode::create(150, 30, "audio args", "chatFont.fnt");
     audioArgsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     audioArgsInput->ignoreAnchorPointForPosition(true);
-    audioArgsInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+
     audioArgsInput->setPosition(ccp(18, 53));
     audioArgsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     audioArgsInput->setMouseEnabled(true);
@@ -199,7 +198,7 @@ bool RenderSettingsLayer::setup() {
     videoArgsInput = CCTextInputNode::create(150, 30, "video args", "chatFont.fnt");
     videoArgsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     videoArgsInput->ignoreAnchorPointForPosition(true);
-    videoArgsInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+
     videoArgsInput->setPosition({19, 22});
     videoArgsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     videoArgsInput->setMouseEnabled(true);
@@ -229,7 +228,7 @@ bool RenderSettingsLayer::setup() {
     secondsInput = CCTextInputNode::create(150, 30, "sec", "chatFont.fnt");
     secondsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     secondsInput->ignoreAnchorPointForPosition(true);
-    secondsInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+
     secondsInput->setPosition(ccp(50, -8));
     secondsInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
     secondsInput->setMouseEnabled(true);
@@ -300,8 +299,8 @@ bool RenderSettingsLayer::setup() {
     fadeInInput->setScale(0.5f);
     fadeInInput->setPosition(ccp(100, -32));
     fadeInInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_in_time").c_str());
-    fadeInInput->getInputNode()->setDelegate(this);
-    fadeInInput->getInputNode()->setAllowedChars("0123456789.");
+    fadeInInput->setCallback([this](std::string const&) { textChanged(nullptr); });
+    fadeInInput->setFilter("0123456789.");
     menu->addChild(fadeInInput);
     
     CCMenuItemToggler* toggle = CCMenuItemToggler::create(
@@ -342,16 +341,16 @@ bool RenderSettingsLayer::setup() {
     extensionInput->setScale(0.8f);
     extensionInput->setPosition(ccp(209, -5));
     extensionInput->setString(Mod::get()->getSavedValue<std::string>("render_file_extension").c_str());
-    extensionInput->getInputNode()->setDelegate(this);
-    extensionInput->getInputNode()->setAllowedChars("abcdefghijklmnñopqrstuvwxyz0123456789.");
+    extensionInput->setCallback([this](std::string const&) { textChanged(nullptr); });
+    extensionInput->setFilter("abcdefghijklmnñopqrstuvwxyz0123456789.");
     menu->addChild(extensionInput);
 
     fadeOutInput = TextInput::create(50.f, "s", "bigFont.fnt");
     fadeOutInput->setScale(0.5f);
     fadeOutInput->setPosition(ccp(100, -58));
     fadeOutInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_out_time").c_str());
-    fadeOutInput->getInputNode()->setDelegate(this);
-    fadeOutInput->getInputNode()->setAllowedChars("0123456789.");
+    fadeOutInput->setCallback([this](std::string const&) { textChanged(nullptr); });
+    fadeOutInput->setFilter("0123456789.");
     menu->addChild(fadeOutInput);
 
     toggle = CCMenuItemToggler::create(
@@ -467,22 +466,22 @@ bool RenderSettingsLayer::setup() {
     menu->addChild(btn);
 
     if (usingApi) {
-        argsInput->m_placeholderLabel->setOpacity(100);
-        audioArgsInput->m_placeholderLabel->setOpacity(100);
+        
+        
 
         argsInput->setID("disabled-input"_spr);
         audioArgsInput->setID("disabled-input"_spr);
 
         extensionInput->setEnabled(false);
-        extensionInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        extensionInput->getPlaceholderLabel()->setOpacity(100);
         extensionInput->getBGSprite()->setOpacity(40);
 
         fadeOutInput->setEnabled(false);
-        fadeOutInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        fadeOutInput->getPlaceholderLabel()->setOpacity(100);
         fadeOutInput->getBGSprite()->setOpacity(40);
 
         fadeInInput->setEnabled(false);
-        fadeInInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        fadeInInput->getPlaceholderLabel()->setOpacity(100);
         fadeInInput->getBGSprite()->setOpacity(40);
 
         onlySongToggle->setCascadeOpacityEnabled(true);

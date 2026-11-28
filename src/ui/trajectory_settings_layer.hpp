@@ -1,7 +1,7 @@
 #include "../includes.hpp"
 #include "../hacks/show_trajectory.hpp"
 
-class TrajectorySettingsLayer : public geode::Popup<>, public ColorPickPopupDelegate, public TextInputDelegate {
+class TrajectorySettingsLayer : public geode::Popup {
 
 public:
 
@@ -18,7 +18,8 @@ private:
 
 	TextInput* input = nullptr;
 	
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(250, 180, Utils::getTexture().c_str())) return false;
         setTitle("Show Trajectory");
 
     	Utils::setBackgroundColor(m_bgSprite);
@@ -55,8 +56,8 @@ private:
 		input = TextInput::create(50.f, "0");
 		input->setPosition({68, 56});
 		input->setScale(0.65f);
-		input->getInputNode()->setAllowedChars("0123456789");
-		input->getInputNode()->setDelegate(this);
+		input->setFilter("0123456789");
+		input->setCallback([this](std::string const&) { textChanged(); });
 		input->setString(Mod::get()->getSavedValue<std::string>("trajectory_length").c_str());
 		m_mainLayer->addChild(input);
 
@@ -113,18 +114,18 @@ private:
 		input->setString("240");
 
 		updateColor({});
-		textChanged(nullptr);
+		textChanged();
 	}
 
 	void openColorPicker(CCObject* obj) {
 		ColorChannelSprite* color = static_cast<CCNode*>(obj)->getTag() == 1 ? color1 : color2;
 		ColorPickPopup* popup = ColorPickPopup::create(color->getColor());
 		popup->setColorTarget(color);
-		popup->setDelegate(this);
+		popup->setCallback([this](cocos2d::ccColor4B const& color) { updateColor(color); });
 		popup->show();
 	}
 
-	void updateColor(const cocos2d::ccColor4B&) override {
+	void updateColor(const cocos2d::ccColor4B&) {
 		ShowTrajectory& t = ShowTrajectory::get();
 		t.color1 = ccc4FFromccc3B(color1->getColor());
 		t.color2 = ccc4FFromccc3B(color2->getColor());
@@ -134,7 +135,7 @@ private:
 		Mod::get()->setSavedValue("trajectory_color2", ShowTrajectory::ccc3BFromccc4F(t.color2));
 	}
 
-	void textChanged(CCTextInputNode*) override {
+	void textChanged() {
 		std::string str = input->getString();
 		int length = geode::utils::numFromString<int>(str).unwrapOr(0);
 

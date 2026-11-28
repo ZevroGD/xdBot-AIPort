@@ -50,7 +50,7 @@ void Macro::autoSave(GJGameLevel* level, int number) {
     if (!level) return;
 
     std::string levelname = level->m_levelName;
-    std::filesystem::path autoSavesPath = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
+    std::filesystem::path autoSavesPath = Mod::get()->getSettingValue<asp::fs::Path>("autosaves_folder").toStdPath().unwrapOr(std::filesystem::path{});
     std::filesystem::path path = autoSavesPath / fmt::format("autosave_{}_{}", levelname, number);
 
     if (!std::filesystem::exists(autoSavesPath)) return;
@@ -70,7 +70,7 @@ void Macro::tryAutosave(GJGameLevel* level, CheckpointObject* cp) {
     if (!g.checkpoints.contains(cp)) return;
     if (g.checkpoints[cp].frame < g.lastAutoSaveFrame) return;
 
-    std::filesystem::path autoSavesPath = g.mod->getSettingValue<std::filesystem::path>("autosaves_folder");
+    std::filesystem::path autoSavesPath = g.mod->getSettingValue<asp::fs::Path>("autosaves_folder").toStdPath().unwrapOr(std::filesystem::path{});
 
     if (!std::filesystem::exists(autoSavesPath))
         return log::debug("Failed to access auto saves path.");
@@ -167,15 +167,7 @@ int Macro::save(std::string author, std::string desc, std::string path, bool jso
     g.macro.description = desc;
     g.macro.duration = g.macro.inputs.back().frame / g.macro.framerate;
 
-    std::wstring widePath = Utils::widen(path);
-
-    if (widePath == L"Widen Error")
-        return 30;
-
-    std::ofstream f(widePath, std::ios::binary);
-
-    if (!f)
-        f.open(path, std::ios::binary);
+    std::ofstream f(path, std::ios::binary);
 
     if (!f)
         return 20;
@@ -216,7 +208,7 @@ Macro Macro::XDtoGDR(std::filesystem::path path) {
     newMacro.description = "N/A";
     newMacro.gameVersion = GEODE_GD_VERSION;
 
-    std::ifstream file(Utils::widen(path.string()));
+    std::ifstream file(path);
     std::string line;
 
     if (!file.is_open()) {

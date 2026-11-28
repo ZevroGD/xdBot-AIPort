@@ -79,11 +79,13 @@ class $modify(EndLevelLayer) {
 
 class $modify(FMODAudioEngine) {
 
-    int playEffect(gd::string path, float speed, float p2, float volume) {
+    int playEffect(std::string path, float speed, float p2, float volume) {
         if (path == "explode_11.ogg" && Global::get().renderer.recording) return 0;
 
         if (path != "playSound_01.ogg" || !Global::get().renderer.recordingAudio)
             return FMODAudioEngine::playEffect(path, speed, p2, volume);
+
+        return 0;
     }
 
 };
@@ -147,7 +149,7 @@ bool Renderer::shouldUseAPI() {
     #ifdef GEODE_IS_WINDOWS
 
     bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
-    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<asp::fs::Path>("ffmpeg_path").toStdPath().unwrapOr(std::filesystem::path{});
     bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
 
     return !foundExe && foundApi;
@@ -168,7 +170,7 @@ bool Renderer::toggle() {
     }
 
     bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
-    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<asp::fs::Path>("ffmpeg_path").toStdPath().unwrapOr(std::filesystem::path{});
     bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
 
     g.renderer.usingApi = Renderer::shouldUseAPI();
@@ -207,9 +209,9 @@ bool Renderer::toggle() {
             return false;
         }
 
-        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
+        asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>("render_folder");
 
-        if (std::filesystem::exists(path))
+        if (path.exists())
             g.renderer.start();
         else {
             if (utils::file::createDirectoryAll(path).isOk())
@@ -252,7 +254,7 @@ void Renderer::start() {
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     
     std::string filename = fmt::format("render_{}_{}{}", std::string_view(pl->m_level->m_levelName), std::to_string(timestamp), extension);
-    std::string path = (Mod::get()->getSettingValue<std::filesystem::path>("render_folder") / filename).string();
+    std::string path = (Mod::get()->getSettingValue<asp::fs::Path>("render_folder").toStdPath().unwrapOr(std::filesystem::path{}) / filename).string();
 
     width = std::stoi(mod->getSavedValue<std::string>("render_width2"));
     height = std::stoi(mod->getSavedValue<std::string>("render_height"));
@@ -436,7 +438,7 @@ void Renderer::start() {
         }
 
         std::filesystem::path tempPath = std::filesystem::path(path).parent_path() / ("temp_" + std::filesystem::path(path).filename().string());
-        std::filesystem::path tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav");
+        std::filesystem::path tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav").toStdPath().unwrapOr(std::filesystem::path{});
 
         if (usingApi) {
             std::string file = audioMode == AudioMode::Song ? songFile : "fmodoutput.wav";
@@ -772,8 +774,8 @@ void Renderer::startAudio(PlayLayer* pl) {
     if (dontRecordAudio) return;
 
     if (pl->m_levelEndAnimationStarted && endLevelLayer != nullptr) {
-        CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, true, false);
-        CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, false, false);
+        CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, true, false, 0.0);
+        CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, false, false, 0.0);
     }
     else if (!pl->m_levelEndAnimationStarted) {
 

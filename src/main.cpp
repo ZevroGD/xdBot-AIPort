@@ -1,16 +1,16 @@
 #include "includes.hpp"
 
 #include "ui/record_layer.hpp"
+#include "ui/game_ui.hpp"
 #include "practice_fixes/practice_fixes.hpp"
 #include "hacks/layout_mode.hpp"
 
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/PauseLayer.hpp>
 
 $execute {
 
-  geode::listenForSettingChanges("macro_accuracy", +[](std::string value) {
+  geode::listenForSettingChanges<std::string>("macro_accuracy", +[](std::string value) {
     auto& g = Global::get();
     
     g.frameFixes = false;
@@ -20,15 +20,15 @@ $execute {
     if (value == "Input Fixes") g.inputFixes = true;
   });
 
-  geode::listenForSettingChanges("frame_fixes_limit", +[](int64_t value) {
+  geode::listenForSettingChanges<int64_t>("frame_fixes_limit", +[](int64_t value) {
     Global::get().frameFixesLimit = value;
   });
 
-  geode::listenForSettingChanges("lock_delta", +[](bool value) {
+  geode::listenForSettingChanges<bool>("lock_delta", +[](bool value) {
     Global::get().lockDelta = value;
   });
 
-  geode::listenForSettingChanges("auto_stop_playing", +[](bool value) {
+  geode::listenForSettingChanges<bool>("auto_stop_playing", +[](bool value) {
     Global::get().stopPlaying = value;
   });
 
@@ -38,6 +38,7 @@ class $modify(PlayLayer) {
 
   struct Fields {
     int delayedLevelRestart = -1;
+    CCLabelBMFont* frameLabel = nullptr;
   };
 
   void postUpdate(float dt) { 
@@ -49,18 +50,27 @@ class $modify(PlayLayer) {
       resetLevelFromStart();
     }
 
+    if (g.state != state::none && g.frameLabel && !g.renderer.recording)
+      m_fields->frameLabel->setString(("Frame: " + std::to_string(Global::getCurrentFrame())).c_str());
+
   }
 
   void onQuit() {
     if (Mod::get()->getSettingValue<bool>("disable_speedhack") && Global::get().speedhackEnabled)
       Global::toggleSpeedhack();
 
+    Macro::resetState();
+
+    Loader::get()->queueInMainThread([] {
+      auto& g = Global::get();
+      if (g.renderer.recording) g.renderer.stop();
+      if (g.renderer.recordingAudio) g.renderer.stopAudio();
+    });
+
     PlayLayer::onQuit();
   }
 
   void pauseGame(bool b1) {
-    Global::updateKeybinds();
-
     if (!Global::get().renderer.tryPause()) return;
 
     auto& g = Global::get();
@@ -109,19 +119,93 @@ class $modify(PlayLayer) {
     PlayLayer::pauseGame(b1);
   }
 
-  bool init(GJGameLevel * level, bool b1, bool b2) {
+  bool init(GJGameLevel * level, bool b1) {
     auto& g = Global::get();
     g.firstAttempt = true;  
 
-    if (!PlayLayer::init(level, b1, b2)) return false;
-
-    Global::updateKeybinds();
-
+    if (!PlayLayer::init(level, b1)) return false;
     auto now = std::chrono::system_clock::now();
     g.currentSession = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     g.lastAutoSaveFrame = 0;
 
+    Interface::addLabels(this);
+    Interface::addButtons(this);
+    m_fields->frameLabel = static_cast<CCLabelBMFont*>(getChildByID("frame-label"_spr));
+
     return true;
+  }
+
+  void storeCheckpoint(CheckpointObject * cp) {
+    if (!cp) return PlayLayer::storeCheckpoint(cp);
+
+    auto& g = Global::get();
+
+    if (!g.cancelCheckpoint)
+      PlayLayer::storeCheckpoint(cp);
+    else {
+      g.cancelCheckpoint = false;
+      return;
+    }
+  }
+
+  void loadFromCheckpoint(CheckpointObject* cp) {
+    if (!cp) return PlayLayer::loadFromCheckpoint(cp);
+
+    auto& g = Global::get();
+
+    if (g.mod->getSavedValue<bool>("autosave_checkpoint_enabled"))
+      Macro::tryAutosave(m_level, cp);
+
+    if (g.state == state::playing) {
+      PlayLayer::loadFromCheckpoint(cp);
+
+      if (!g.checkpoints.contains(cp)) return;
+      if (g.checkpoints[cp].frame <= 1) return;
+
+      PlayerData p1Data = g.checkpoints[cp].p1;
+      PlayerData p2Data = g.checkpoints[cp].p2;
+
+      g.respawnFrame = g.checkpoints[cp].frame;
+      g.previousFrame = g.checkpoints[cp].previousFrame;
+      PlayerPracticeFixes::applyData(this->m_player1, p1Data, false);
+      PlayerPracticeFixes::applyData(this->m_player2, p2Data, true);
+
+      return;
+    }
+
+    if ((g.state != state::recording && !Mod::get()->getSavedValue<bool>("macro_always_practice_fixes")))
+      return PlayLayer::loadFromCheckpoint(cp);
+
+    if (!g.checkpoints.contains(cp)) return PlayLayer::loadFromCheckpoint(cp);
+
+    Macro::resetVariables();
+
+    int frame = g.checkpoints[cp].frame;
+    PlayerData p1Data = g.checkpoints[cp].p1;
+    PlayerData p2Data = g.checkpoints[cp].p2;
+
+    g.ignoreJumpButton = frame + 1;
+    g.previousFrame = g.checkpoints[cp].previousFrame;
+
+#ifdef GEODE_IS_WINDOWS
+    if (g.seedEnabled) {
+      uintptr_t seed = g.checkpoints[cp].seed;
+      *(uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
+    }
+#endif
+
+    if (g.state == state::recording)
+      InputPracticeFixes::applyFixes(this, p1Data, p2Data, frame);
+
+    PlayLayer::loadFromCheckpoint(cp);
+
+    PlayerPracticeFixes::applyData(this->m_player1, p1Data, false);
+    PlayerPracticeFixes::applyData(this->m_player2, p2Data, true);
+
+    if (g.state != state::recording && g.mod->getSavedValue<bool>("macro_always_practice_fixes")) {
+      this->m_player1->releaseButton(static_cast<PlayerButton>(1));
+      this->m_player2->releaseButton(static_cast<PlayerButton>(1));
+    }
   }
 
   void resetLevel() {
@@ -196,7 +280,23 @@ class $modify(BGLHook, GJBaseGameLayer) {
     bool macroInput = false;
   };
 
-  void processCommands(float dt) {
+  void toggleFlipped(bool p0, bool p1) {
+    if (Mod::get()->getSavedValue<bool>("no_mirror_portal"))
+      p0 = false;
+    if (Global::get().state == state::recording || Mod::get()->getSavedValue<bool>("instant_mirror_portal"))
+      p1 = true;
+
+    GJBaseGameLayer::toggleFlipped(p0, p1);
+  }
+
+  void checkpointActivated(CheckpointGameObject * cp) {
+    if (Global::get().state == state::none)
+      GJBaseGameLayer::checkpointActivated(cp);
+    else
+      Global::get().cancelCheckpoint = true;
+  }
+
+  void processCommands(float dt, bool isHalfTick, bool isLastTick) {
     auto& g = Global::get();
 
     PlayLayer* pl = PlayLayer::get();
@@ -204,7 +304,7 @@ class $modify(BGLHook, GJBaseGameLayer) {
     if (!pl) {
       // handlePlaying(Global::getCurrentFrame(true));
       // log::debug("{}", Global::getCurrentFrame(true));
-      return GJBaseGameLayer::processCommands(dt);
+      return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
     }
 
     Global::updateSeed();
@@ -229,11 +329,11 @@ class $modify(BGLHook, GJBaseGameLayer) {
       }
 
       if (g.previousFrame == frame && frame != 0 && g.macro.xdBotMacro)
-        return GJBaseGameLayer::processCommands(dt);
+        return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     }
 
-    GJBaseGameLayer::processCommands(dt);
+    GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     if (g.state == state::none)
       return;
@@ -431,48 +531,3 @@ class $modify(BGLHook, GJBaseGameLayer) {
   }
 };
 
-class $modify(PauseLayer) {
-
-  void onPracticeMode(CCObject * sender) {
-    PauseLayer::onPracticeMode(sender);
-    if (Global::get().state != state::none) PlayLayer::get()->resetLevel();
-  }
-
-  void onNormalMode(CCObject * sender) {
-    PauseLayer::onNormalMode(sender);
-    auto& g = Global::get();
-
-    g.checkpoints.clear();
-
-    if (g.restart) {
-      if (PlayLayer* pl = PlayLayer::get())
-        pl->resetLevel();
-    }
-
-  }
-
-  void onQuit(CCObject * sender) {
-    PauseLayer::onQuit(sender);
-
-    Macro::resetState();
-
-    Loader::get()->queueInMainThread([] {
-      auto& g = Global::get();
-      if (g.renderer.recording) g.renderer.stop();
-      if (g.renderer.recordingAudio) g.renderer.stopAudio();
-    });
-  }
-
-  void goEdit() {
-    PauseLayer::goEdit();
-
-    Macro::resetState();
-    
-    Loader::get()->queueInMainThread([] {
-      auto& g = Global::get();
-      if (g.renderer.recording) g.renderer.stop();
-      if (g.renderer.recordingAudio) g.renderer.stopAudio();
-    });
-  }
-
-};

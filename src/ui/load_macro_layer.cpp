@@ -3,6 +3,7 @@
 #include "macro_editor.hpp"
 
 #include <Geode/modify/CCMenu.hpp>
+#include <utility>
 
 class $modify(CCMenu) {
 	virtual bool ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
@@ -25,17 +26,17 @@ class $modify(CCMenu) {
 	}
 };
 
-void LoadMacroLayer::open(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
-	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
+void LoadMacroLayer::open(geode::Popup* layer, geode::Popup* layer2, bool autosaves) {
+	asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder");
 
-	if (!std::filesystem::exists(path)) {
+	if (!path.exists()) {
 		if (utils::file::createDirectoryAll(path).isErr())
 			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 6", "Ok")->show();
 	}
 
-	path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
+	path = Mod::get()->getSettingValue<asp::fs::Path>("autosaves_folder");
 
-	if (!std::filesystem::exists(path)) {
+	if (!path.exists()) {
 		if (utils::file::createDirectoryAll(path).isErr())
 			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 61", "Ok")->show();
 	}
@@ -45,8 +46,8 @@ void LoadMacroLayer::open(geode::Popup<>* layer, geode::Popup<>* layer2, bool au
 	layerReal->show();
 }
 
-void LoadMacroLayer::textChanged(CCTextInputNode* node) {
-	search = Utils::toLower(node->getString());
+void LoadMacroLayer::textChanged() {
+	search = Utils::toLower(searchInput->getString());
 	if (search != "") {
 		searchOff->setVisible(true);
 		searchOff->setOpacity(184);
@@ -126,9 +127,12 @@ void LoadMacroLayer::onSelectAll(CCObject* obj) {
 	}
 }
 
-LoadMacroLayer* LoadMacroLayer::create(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
+LoadMacroLayer* LoadMacroLayer::create(geode::Popup* layer, geode::Popup* layer2, bool autosaves) {
 	LoadMacroLayer* ret = new LoadMacroLayer();
-	if (ret->initAnchored(385, 291, layer, layer2, autosaves, Utils::getTexture().c_str())) {
+	ret->menuLayer = layer;
+	ret->mergeLayer = layer2;
+	ret->isAutosaves = autosaves;
+	if (ret->init()) {
 		ret->autorelease();
 		return ret;
 	}
@@ -144,9 +148,12 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 	textFilter.files = { "*.gdr", "*.xd", "*.json" };
 	fileOptions.filters.push_back(textFilter);
 
-	file::pick(file::PickMode::OpenFile, { dirs::getGameDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
-		if (res->isOk()) {
-			std::filesystem::path path = res->unwrapOrDefault();
+	fileOptions.defaultPath = dirs::getGameDir();
+	async::spawn(file::pick(file::PickMode::OpenFile, std::move(fileOptions)), [this](Result<std::optional<asp::fs::Path>> result) {
+        if (!result.isOk()) return;
+        auto picked = result.unwrap();
+        if (!picked) return;
+        std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
 
 			auto& g = Global::get();
 			Macro tempMacro;
@@ -181,7 +188,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 			std::string name = path.filename().string().substr(0, path.filename().string().find_last_of('.'));
 
-			std::filesystem::path newPath = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder") / name;
+			std::filesystem::path newPath = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath().unwrapOr(std::filesystem::path{}) / name;
 
 			std::string pathString = newPath.string();
 
@@ -198,7 +205,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 			pathString += ".gdr.json";
 
-			std::ofstream f2(Utils::widen(pathString), std::ios::binary);
+			std::ofstream f2(pathString, std::ios::binary);
 			auto data = tempMacro.exportData(true);
 
 			f2.write(reinterpret_cast<const char*>(data.data()), data.size());
@@ -210,11 +217,11 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 				FLAlertLayer::create("Warning", "<cl>.xd</c> extension macros may not function correctly in this version.", "Ok")->show();
 
 			Notification::create("Macro Imported", NotificationIcon::Success)->show();
-		}
-		});
+    });
 }
 
-bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
+bool LoadMacroLayer::init() {
+	if (!geode::Popup::init(385, 291, Utils::getTexture().c_str())) return false;
 
 	#ifdef GEODE_IS_ANDROID
 	invertSort = true;
@@ -226,14 +233,12 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 
 	Utils::setBackgroundColor(m_bgSprite);
 
-	menuLayer = layer;
-	mergeLayer = layer2;
-	isAutosaves = autosaves;
+
 	isMerge = mergeLayer != nullptr;
 
 	setTitle(isMerge ? "Merge Macro" : "Load Macro");
 	m_title->setPositionY(m_title->getPositionY() + 5);
-    m_closeBtn->getNormalImage()->setScale(0.6f);
+    m_closeBtn->setScale(0.6f);
 
 	cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
     m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
@@ -255,7 +260,7 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 
 		searchInput = TextInput::create(235, "Search Macro", "bigFont.fnt");
 		searchInput->setPositionY(100);
-		searchInput->setDelegate(this);
+		searchInput->setCallback([this](std::string const&) { textChanged(); });
 		menu->addChild(searchInput);
 
 		CCSprite* emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
@@ -413,8 +418,10 @@ void LoadMacroLayer::updateSort(CCObject*) {
 void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	cocos2d::CCSize winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
-	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>(isAutosaves ? "autosaves_folder" : "macros_folder");
-	std::vector<std::filesystem::path> macros = file::readDirectory(path).unwrapOrDefault();
+	asp::fs::Path path = Mod::get()->getSettingValue<asp::fs::Path>(isAutosaves ? "autosaves_folder" : "macros_folder");
+	std::vector<std::filesystem::path> macros;
+	for (auto const& entry : file::readDirectory(path).unwrapOrDefault())
+		macros.push_back(entry.toStdPath().unwrapOr(std::filesystem::path{}));
 
 	CCArray* cells = CCArray::create();
 
@@ -465,7 +472,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	cocos2d::ccColor3B color1 = ccc3(std::max(0, color.r - 70), std::max(0, color.g - 70), std::max(0, color.b - 70));
 	cocos2d::ccColor3B color2 = ccc3(std::max(0, color.r - 55), std::max(0, color.g - 55), std::max(0, color.b - 55));
 
-	CCARRAY_FOREACH(children, child) {
+	for (auto child : CCArrayExt<CCObject*>(children)) {
 		if (GenericListCell* cell = typeinfo_cast<GenericListCell*>(child)) {
 			allMacros.push_back(static_cast<MacroCell*>(cell->getChildren()->objectAtIndex(2)));
 
@@ -546,7 +553,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	}
 }
 
-MacroCell* MacroCell::create(std::filesystem::path path, std::string name, std::time_t date, geode::Popup<>* menuLayer, geode::Popup<>* mergeLayer, CCLayer* loadLayer) {
+MacroCell* MacroCell::create(std::filesystem::path path, std::string name, std::time_t date, geode::Popup* menuLayer, geode::Popup* mergeLayer, CCLayer* loadLayer) {
 	MacroCell* ret = new MacroCell();
 	if (!ret->init(path, name, date, menuLayer, mergeLayer, loadLayer)) {
 		delete ret;
@@ -557,7 +564,7 @@ MacroCell* MacroCell::create(std::filesystem::path path, std::string name, std::
 	return ret;
 }
 
-bool MacroCell::init(std::filesystem::path path, std::string name, std::time_t date, geode::Popup<>* menuLayer, geode::Popup<>* mergeLayer, CCLayer* loadLayer) {
+bool MacroCell::init(std::filesystem::path path, std::string name, std::time_t date, geode::Popup* menuLayer, geode::Popup* mergeLayer, CCLayer* loadLayer) {
 
 	this->path = path;
 	this->date = date;
@@ -696,7 +703,7 @@ void MacroCell::handleLoad() {
 
 		if (mergeLayer) {
 			typeinfo_cast<MacroEditLayer*>(mergeLayer)->mergeMacro(newMacro.inputs, players, static_cast<LoadMacroLayer*>(loadLayer)->owToggle->isToggled());
-			loadLayer->keyBackClicked();
+			loadLayer->removeFromParentAndCleanup(true);
 		}
 
 		return;
@@ -710,12 +717,12 @@ void MacroCell::handleLoad() {
 
     g.macro.xdBotMacro = g.macro.botInfo.name == "xdBot";
 
-	loadLayer->keyBackClicked();
+	loadLayer->removeFromParentAndCleanup(true);
 
 	RecordLayer* newLayer = nullptr;
 
 	if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(menuLayer)) {
-		layer->keyBackClicked();
+		layer->onClose(nullptr);
 		newLayer = RecordLayer::openMenu(true);
 	}
 

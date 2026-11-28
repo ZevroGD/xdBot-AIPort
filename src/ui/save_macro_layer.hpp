@@ -1,7 +1,7 @@
 #pragma once
 #include "../includes.hpp"
 
-class SaveMacroLayer : public geode::Popup<> {
+class SaveMacroLayer : public geode::Popup {
 
     TextInput* authorInput = nullptr;
     TextInput* descInput = nullptr;
@@ -11,7 +11,8 @@ class SaveMacroLayer : public geode::Popup<> {
 
 private:
 
-    bool setup() override {
+    bool init() {
+        if (!geode::Popup::init(285, 194, Utils::getTexture().c_str())) return false;
         Utils::setBackgroundColor(m_bgSprite);
 
         setTitle("Save Macro");
@@ -76,10 +77,10 @@ public:
         if (Global::get().macro.inputs.empty())
             return FLAlertLayer::create("Save Macro", "You can't save an <cl>empty</c> macro.", "Ok")->show();
 
-        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
+        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath().unwrapOr(std::filesystem::path{});
 
         if (!std::filesystem::exists(path)) {
-            if (!utils::file::createDirectoryAll(path).isOk())
+            if (!utils::file::createDirectoryAll(asp::fs::Path::fromStdPath(path)).isOk())
                 return FLAlertLayer::create("Error", ("There was an error getting the folder \"" + path.string() + "\". ID: 10").c_str(), "Ok")->show();
         }
 
@@ -93,7 +94,7 @@ public:
         if (macroName == "")
             return FLAlertLayer::create("Save Macro", "Give a <cl>name</c> to the macro.", "Ok")->show();
 
-        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder") / macroName;
+        std::filesystem::path path = Mod::get()->getSettingValue<asp::fs::Path>("macros_folder").toStdPath().unwrapOr(std::filesystem::path{}) / macroName;
         std::string author = authorInput->getString();
         std::string desc = descInput->getString();
 

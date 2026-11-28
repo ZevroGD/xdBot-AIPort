@@ -1,5 +1,7 @@
 #include "clickbot_layer.hpp"
 
+#include <utility>
+
 void ClickbotLayer::updateLabels() {
 	auto& g = Global::get();
 
@@ -19,7 +21,8 @@ void ClickbotLayer::updateLabels() {
 
 }
 
-bool ClickbotLayer::setup() {
+bool ClickbotLayer::init() {
+    if (!geode::Popup::init(432, 250, Utils::getTexture().c_str())) return false;
 	setTitle("ClickBot");
 	m_title->setPositionY(m_title->getPositionY() + 5);
 	
@@ -285,9 +288,11 @@ bool ClickbotLayer::setup() {
 	return true;
 }
 
-ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup<>* layer) {
+ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup* layer) {
 	ClickSettingsLayer* ret = new ClickSettingsLayer();
-	if (ret->initAnchored(250, 173, button, layer, Utils::getTexture().c_str())) {
+	ret->button = button;
+	ret->clickbotLayer = layer;
+	if (ret->init()) {
 		ret->autorelease();
 		return ret;
 	}
@@ -296,7 +301,8 @@ ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup<
 	return nullptr;
 }
 
-bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
+bool ClickSettingsLayer::init() {
+    if (!geode::Popup::init(250, 173, Utils::getTexture().c_str())) return false;
 	cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
     m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
     m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
@@ -307,8 +313,6 @@ bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
 	CCMenu* menu = CCMenu::create();
 	m_mainLayer->addChild(menu);
 
-	this->button = button;
-	this->clickbotLayer = layer;
 
 	matjson::Value data = Mod::get()->getSavedValue<matjson::Value>(button);
 	settings = matjson::Serialize<ClickSetting>::from_json(data);
@@ -402,9 +406,12 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 	textFilter.files = { "*.mp3", "*.ogg" };
 	fileOptions.filters.push_back(textFilter);
 
-	file::pick(file::PickMode::OpenFile, { Mod::get()->getResourcesDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
-		if (res->isOk()) {
-			std::filesystem::path path = res->unwrapOrDefault();
+	fileOptions.defaultPath = Mod::get()->getResourcesDir();
+	async::spawn(file::pick(file::PickMode::OpenFile, std::move(fileOptions)), [this](Result<std::optional<asp::fs::Path>> result) {
+        if (!result.isOk()) return;
+        auto picked = result.unwrap();
+        if (!picked) return;
+        std::filesystem::path path = picked->toStdPath().unwrapOr(std::filesystem::path{});
 
 			filenameLabel->setString(path.filename().string().c_str());
 
@@ -412,8 +419,7 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 			saveSettings();
 
 			static_cast<ClickbotLayer*>(clickbotLayer)->updateLabels();
-		}
-		});
+    });
 }
 
 void ClickSettingsLayer::onRestore(CCObject*) {
@@ -427,7 +433,7 @@ void ClickSettingsLayer::onRestore(CCObject*) {
 
 	settings.disabled = false;
 	
-	std::filesystem::path path = Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button);
+	std::filesystem::path path = (Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button)).toStdPath().unwrapOr(std::filesystem::path{});
 
 	filenameLabel->setString(path.filename().string().c_str());
 
